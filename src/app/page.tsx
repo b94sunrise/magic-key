@@ -1,97 +1,90 @@
-import Link from "next/link";
-
-function Highlight({ children }: { children: React.ReactNode }) {
-  return <span className="text-emerald-400">{children}</span>;
-}
-
 export default function HomePage() {
   return (
-    <main className="min-h-screen bg-black px-6 py-10 text-white">
-      <section className="mx-auto max-w-7xl">
-        <div className="flex min-h-[78vh] flex-col items-center justify-center text-center">
-          <div className="rounded-[2.5rem] border border-emerald-400/15 bg-gradient-to-b from-emerald-400/10 via-zinc-950/80 to-black px-8 py-12 shadow-[0_0_90px_rgba(16,185,129,0.10)] md:px-20 md:py-14">
-            <p className="text-5xl font-black uppercase tracking-[0.22em] text-emerald-400 md:text-7xl">
-              Magic
-            </p>
+    <main className="min-h-screen bg-black text-white">
+      <section className="mx-auto grid max-w-7xl grid-cols-1 gap-12 px-6 py-10 lg:grid-cols-2">
+        <div className="flex min-h-[85vh] flex-col justify-center">
+          <p className="text-sm font-black uppercase tracking-[0.45em] text-emerald-400">
+            Für Makler & Hausverwaltungen
+          </p>
 
-            <p className="mt-2 text-4xl font-black uppercase tracking-[0.25em] text-emerald-400 md:text-6xl">
-              Key
-            </p>
+          <h1 className="mt-8 text-6xl font-black uppercase leading-[0.9] md:text-8xl">
+            Die besten Mieter zuerst sehen.
+          </h1>
 
-            <div className="mx-auto mt-7 h-[2px] w-full max-w-3xl bg-gradient-to-r from-transparent via-emerald-400/80 to-transparent" />
+          <p className="mt-8 max-w-xl text-xl leading-9 text-zinc-300">
+            Magic Key analysiert 150 Bewerbungen automatisch und sortiert
+            Interessenten nach A-, B- und C-Kandidaten.
+          </p>
 
-            <p className="mt-6 text-xs font-bold uppercase tracking-[0.45em] text-zinc-400 md:text-sm">
-              Real Estate Â· Bewerberanalyse Â· Vorauswahl
-            </p>
-
-            <h1 className="mt-10 max-w-5xl text-3xl font-black uppercase leading-tight md:text-5xl">
-              <Highlight>Wohnungsbewerbungen</Highlight>
-              <br />
-              automatisch vorsortieren.
-            </h1>
-
-            <p className="mx-auto mt-7 max-w-3xl text-base leading-8 text-zinc-300 md:text-lg">
-              Weniger Zeit mit ungeeigneten Anfragen verschwenden. Magic Key
-              bewertet Bewerbungen automatisch und zeigt sofort, welche
-              Interessenten besonders gut zur Immobilie passen.
-            </p>
-
-            <div className="mt-10 flex flex-col justify-center gap-4 sm:flex-row">
-              <Link
-                href="/demo"
-                className="rounded-xl bg-emerald-400 px-10 py-5 text-center font-black uppercase text-black shadow-[0_0_30px_rgba(16,185,129,0.22)] hover:bg-emerald-300"
-              >
-                Demo anfragen
-              </Link>
-
-              <Link
-                href="/login"
-                className="rounded-xl border border-emerald-400/30 px-10 py-5 text-center font-black uppercase text-white hover:border-emerald-400 hover:text-emerald-400"
-              >
-                Login
-              </Link>
-            </div>
+          <div className="mt-10 flex gap-4">
+            <a className="rounded-xl bg-emerald-400 px-9 py-5 font-black uppercase text-black">
+              Demo anfragen
+            </a>
+            <a className="rounded-xl border border-white/10 px-9 py-5 font-black uppercase">
+              Dashboard ansehen
+            </a>
           </div>
         </div>
 
-        <div className="grid gap-5 md:grid-cols-3">
-          <div className="rounded-2xl border border-zinc-800 bg-zinc-950/90 p-6 text-left">
-            <p className="mb-3 text-sm font-black uppercase tracking-[0.25em] text-emerald-400">
-              Problem
-            </p>
-            <h2 className="mb-4 text-2xl font-black uppercase">
-              <Highlight>Zu</Highlight> viele Anfragen.
-            </h2>
-            <p className="leading-7 text-zinc-300">
-              Makler und Wohnungsbaugesellschaften prÃ¼fen tÃ¤glich dieselben
-              Informationen immer wieder manuell.
-            </p>
-          </div>
+        <div className="flex items-center">
+          <div className="w-full rounded-[32px] border border-white/10 bg-zinc-950 p-6 shadow-[0_0_100px_rgba(16,185,129,0.16)]">
+            <div className="mb-6 flex items-center justify-between border-b border-white/10 pb-5">
+              <div>
+                <p className="text-xs uppercase tracking-[0.35em] text-zinc-500">
+                  Live Preview
+                </p>
+                <h2 className="mt-2 text-2xl font-black uppercase">
+                  Bewerber Dashboard
+                </h2>
+              </div>
+              <span className="rounded-full bg-emerald-400 px-4 py-2 text-sm font-black text-black">
+                150 Bewerber
+              </span>
+            </div>
 
-          <div className="rounded-2xl border border-zinc-800 bg-zinc-950/90 p-6 text-left">
-            <p className="mb-3 text-sm font-black uppercase tracking-[0.25em] text-emerald-400">
-              Analyse
-            </p>
-            <h2 className="mb-4 text-2xl font-black uppercase">
-              <Highlight>Automatische</Highlight> Bewertung.
-            </h2>
-            <p className="leading-7 text-zinc-300">
-              Einkommen, HaushaltsgrÃ¶ÃŸe, BeschÃ¤ftigung und weitere Kriterien
-              werden automatisch eingeordnet.
-            </p>
-          </div>
+            <div className="grid gap-4 md:grid-cols-3">
+              <div className="rounded-2xl bg-emerald-400/10 p-5">
+                <p className="text-4xl font-black text-emerald-400">12</p>
+                <p className="mt-2 text-sm font-bold uppercase text-zinc-300">
+                  A Kandidaten
+                </p>
+              </div>
+              <div className="rounded-2xl bg-white/[0.04] p-5">
+                <p className="text-4xl font-black">34</p>
+                <p className="mt-2 text-sm font-bold uppercase text-zinc-300">
+                  B Kandidaten
+                </p>
+              </div>
+              <div className="rounded-2xl bg-white/[0.04] p-5 opacity-60">
+                <p className="text-4xl font-black">104</p>
+                <p className="mt-2 text-sm font-bold uppercase text-zinc-300">
+                  C Kandidaten
+                </p>
+              </div>
+            </div>
 
-          <div className="rounded-2xl border border-zinc-800 bg-zinc-950/90 p-6 text-left">
-            <p className="mb-3 text-sm font-black uppercase tracking-[0.25em] text-emerald-400">
-              Ergebnis
-            </p>
-            <h2 className="mb-4 text-2xl font-black uppercase">
-              <Highlight>A</Highlight> / B / C Kandidaten.
-            </h2>
-            <p className="leading-7 text-zinc-300">
-              Sofort erkennen, welche Bewerber priorisiert geprÃ¼ft werden
-              sollten.
-            </p>
+            {[
+              ["Max Mustermann", "4.200 € netto · unbefristet", "92", "A"],
+              ["Anna Becker", "SCHUFA vorhanden · keine Haustiere", "88", "A"],
+              ["Tim Wagner", "2 Personen · Einzug flexibel", "74", "B"],
+              ["Kevin Müller", "Unvollständige Angaben", "41", "C"],
+            ].map(([name, meta, score, type]) => (
+              <div
+                key={name}
+                className="mt-4 flex items-center justify-between rounded-2xl border border-white/5 bg-black/40 p-4"
+              >
+                <div>
+                  <p className="font-black">{name}</p>
+                  <p className="mt-1 text-sm text-zinc-500">{meta}</p>
+                </div>
+                <div className="flex items-center gap-5">
+                  <span className="text-xl font-black">{score}</span>
+                  <span className="text-2xl font-black text-emerald-400">
+                    {type}
+                  </span>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
