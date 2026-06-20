@@ -7,54 +7,146 @@ type Result = {
   category: "A" | "B" | "C";
   title: string;
   recommendation: string;
-  notes: string[];
+  positives: string[];
+  risks: string[];
 };
 
 export default function DemoPage() {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
   const [income, setIncome] = useState("");
+  const [rent, setRent] = useState("");
   const [employment, setEmployment] = useState("Festanstellung");
   const [household, setHousehold] = useState("");
+  const [moveIn, setMoveIn] = useState("");
   const [pets, setPets] = useState("Nein");
   const [smoker, setSmoker] = useState("Nein");
   const [schufa, setSchufa] = useState("Ja");
+  const [debts, setDebts] = useState("Nein");
+
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [phase, setPhase] = useState("");
   const [result, setResult] = useState<Result | null>(null);
 
   function analyzeApplication() {
-    setLoading(true);
+    setError("");
     setResult(null);
 
-    setTimeout(() => {
+    if (name.trim().length < 2) {
+      setError("Bitte einen vollständigen Namen eintragen.");
+      return;
+    }
+
+    if (!email.includes("@")) {
+      setError("Bitte eine gültige E-Mail eintragen.");
+      return;
+    }
+
+    const netIncome = Number(income);
+    const warmRent = Number(rent);
+    const people = Number(household);
+
+    if (!netIncome || netIncome <= 0) {
+      setError("Bitte ein gültiges Nettoeinkommen eintragen.");
+      return;
+    }
+
+    if (!warmRent || warmRent <= 0) {
+      setError("Bitte eine gültige Warmmiete eintragen.");
+      return;
+    }
+
+    if (!people || people <= 0) {
+      setError("Bitte eine gültige Haushaltsgröße eintragen.");
+      return;
+    }
+
+    if (!moveIn.trim()) {
+      setError("Bitte ein Einzugsdatum eintragen.");
+      return;
+    }
+
+    setLoading(true);
+
+    const phases = [
+      "Bewerbungsdaten prüfen...",
+      "Einkommen und Warmmiete vergleichen...",
+      "Haushalt und Angaben bewerten...",
+      "SCHUFA und Risikofaktoren prüfen...",
+      "Score berechnen...",
+    ];
+
+    let index = 0;
+    setPhase(phases[index]);
+
+    const interval = setInterval(() => {
+      index += 1;
+
+      if (index < phases.length) {
+        setPhase(phases[index]);
+        return;
+      }
+
+      clearInterval(interval);
+
       let score = 35;
-      const netIncome = Number(income);
-      const people = Number(household);
+      const rentRatio = warmRent / netIncome;
 
-      if (netIncome >= 4500) score += 25;
-      else if (netIncome >= 3500) score += 20;
-      else if (netIncome >= 2800) score += 14;
-      else if (netIncome >= 2200) score += 8;
+      if (rentRatio <= 0.3) score += 25;
+      else if (rentRatio <= 0.4) score += 18;
+      else if (rentRatio <= 0.5) score += 8;
+      else score -= 12;
+
+      if (netIncome >= 4500) score += 18;
+      else if (netIncome >= 3500) score += 14;
+      else if (netIncome >= 2800) score += 8;
+      else if (netIncome < 2200) score -= 8;
+
+      if (employment === "Unbefristet") score += 18;
+      else if (employment === "Festanstellung") score += 14;
+      else if (employment === "Selbstständig") score += 5;
       else score -= 8;
 
-      if (employment === "Unbefristet") score += 22;
-      else if (employment === "Festanstellung") score += 18;
-      else if (employment === "Selbstständig") score += 8;
-      else score -= 8;
-
-      if (people > 0 && people <= 2) score += 8;
+      if (people <= 2) score += 8;
       else if (people >= 4) score -= 8;
 
-      if (pets === "Nein") score += 5;
+      if (schufa === "Ja") score += 15;
+      else score -= 25;
+
+      if (debts === "Nein") score += 8;
+      else score -= 20;
+
+      if (pets === "Nein") score += 4;
       else score -= 3;
 
-      if (smoker === "Nein") score += 5;
+      if (smoker === "Nein") score += 4;
       else score -= 6;
-
-      if (schufa === "Ja") score += 15;
-      else score -= 22;
 
       score = Math.max(0, Math.min(100, score));
 
       const category = score >= 82 ? "A" : score >= 62 ? "B" : "C";
+
+      const positives = [];
+      const risks = [];
+
+      if (rentRatio <= 0.4) positives.push("Warmmiete passt zum Einkommen");
+      else risks.push("Warmmiete ist im Verhältnis zum Einkommen hoch");
+
+      if (employment === "Unbefristet" || employment === "Festanstellung") {
+        positives.push("Beschäftigung wirkt stabil");
+      } else {
+        risks.push("Beschäftigung sollte zusätzlich geprüft werden");
+      }
+
+      if (schufa === "Ja") positives.push("SCHUFA vorhanden");
+      else risks.push("SCHUFA fehlt");
+
+      if (debts === "Nein") positives.push("Keine Mietschulden angegeben");
+      else risks.push("Mietschulden angegeben");
+
+      if (pets === "Ja") risks.push("Haustiere angegeben");
+      if (smoker === "Ja") risks.push("Raucher angegeben");
 
       setResult({
         score,
@@ -69,24 +161,15 @@ export default function DemoPage() {
           category === "A"
             ? "Besichtigung anbieten"
             : category === "B"
-              ? "Auf Warteliste setzen"
-              : "Manuell prüfen oder absagen",
-        notes: [
-          netIncome >= 2800
-            ? "Einkommen liegt im positiven Bereich"
-            : "Einkommen sollte genauer geprüft werden",
-          employment === "Unbefristet" || employment === "Festanstellung"
-            ? "Beschäftigung wirkt stabil"
-            : "Beschäftigung erfordert zusätzliche Prüfung",
-          schufa === "Ja" ? "SCHUFA vorhanden" : "SCHUFA fehlt",
-          pets === "Nein" && smoker === "Nein"
-            ? "Keine zusätzlichen Risikofaktoren angegeben"
-            : "Zusätzliche Angaben beachten",
-        ],
+              ? "Warteliste / manuell prüfen"
+              : "Nachrangig behandeln",
+        positives,
+        risks,
       });
 
       setLoading(false);
-    }, 900);
+      setPhase("");
+    }, 450);
   }
 
   return (
@@ -102,64 +185,157 @@ export default function DemoPage() {
 
         <div className="mt-12 grid gap-8 lg:grid-cols-[1fr_0.9fr]">
           <div className="rounded-[32px] border border-white/10 bg-zinc-950 p-8">
-            <div className="grid gap-6 md:grid-cols-2">
-              <input className="rounded-xl border border-white/10 bg-black p-4" placeholder="Name" />
-              <input className="rounded-xl border border-white/10 bg-black p-4" placeholder="E-Mail" />
+            <div className="grid gap-5 md:grid-cols-2">
+              <div>
+                <label className="mb-2 block text-xs font-black uppercase tracking-[0.2em] text-zinc-500">
+                  Name
+                </label>
+                <input
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="w-full rounded-xl border border-white/10 bg-black p-4"
+                  placeholder="Max Mustermann"
+                />
+              </div>
 
-              <input
-                value={income}
-                onChange={(e) => setIncome(e.target.value)}
-                className="rounded-xl border border-white/10 bg-black p-4"
-                placeholder="Nettoeinkommen"
-              />
+              <div>
+                <label className="mb-2 block text-xs font-black uppercase tracking-[0.2em] text-zinc-500">
+                  E-Mail
+                </label>
+                <input
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full rounded-xl border border-white/10 bg-black p-4"
+                  placeholder="max@mail.de"
+                />
+              </div>
 
-              <select
-                value={employment}
-                onChange={(e) => setEmployment(e.target.value)}
-                className="rounded-xl border border-white/10 bg-black p-4"
-              >
-                <option>Festanstellung</option>
-                <option>Unbefristet</option>
-                <option>Selbstständig</option>
-                <option>Befristet</option>
-              </select>
+              <div>
+                <label className="mb-2 block text-xs font-black uppercase tracking-[0.2em] text-zinc-500">
+                  Nettoeinkommen
+                </label>
+                <input
+                  value={income}
+                  onChange={(e) => setIncome(e.target.value)}
+                  className="w-full rounded-xl border border-white/10 bg-black p-4"
+                  placeholder="3200"
+                />
+              </div>
 
-              <input
-                value={household}
-                onChange={(e) => setHousehold(e.target.value)}
-                className="rounded-xl border border-white/10 bg-black p-4"
-                placeholder="Haushaltsgröße"
-              />
+              <div>
+                <label className="mb-2 block text-xs font-black uppercase tracking-[0.2em] text-zinc-500">
+                  Warmmiete
+                </label>
+                <input
+                  value={rent}
+                  onChange={(e) => setRent(e.target.value)}
+                  className="w-full rounded-xl border border-white/10 bg-black p-4"
+                  placeholder="950"
+                />
+              </div>
 
-              <input className="rounded-xl border border-white/10 bg-black p-4" placeholder="Einzugsdatum" />
+              <div>
+                <label className="mb-2 block text-xs font-black uppercase tracking-[0.2em] text-zinc-500">
+                  Beschäftigung
+                </label>
+                <select
+                  value={employment}
+                  onChange={(e) => setEmployment(e.target.value)}
+                  className="w-full rounded-xl border border-white/10 bg-black p-4"
+                >
+                  <option>Festanstellung</option>
+                  <option>Unbefristet</option>
+                  <option>Selbstständig</option>
+                  <option>Befristet</option>
+                </select>
+              </div>
 
-              <select
-                value={pets}
-                onChange={(e) => setPets(e.target.value)}
-                className="rounded-xl border border-white/10 bg-black p-4"
-              >
-                <option>Nein</option>
-                <option>Ja</option>
-              </select>
+              <div>
+                <label className="mb-2 block text-xs font-black uppercase tracking-[0.2em] text-zinc-500">
+                  Haushaltsgröße
+                </label>
+                <input
+                  value={household}
+                  onChange={(e) => setHousehold(e.target.value)}
+                  className="w-full rounded-xl border border-white/10 bg-black p-4"
+                  placeholder="2"
+                />
+              </div>
 
-              <select
-                value={smoker}
-                onChange={(e) => setSmoker(e.target.value)}
-                className="rounded-xl border border-white/10 bg-black p-4"
-              >
-                <option>Nein</option>
-                <option>Ja</option>
-              </select>
+              <div>
+                <label className="mb-2 block text-xs font-black uppercase tracking-[0.2em] text-zinc-500">
+                  Einzugsdatum
+                </label>
+                <input
+                  value={moveIn}
+                  onChange={(e) => setMoveIn(e.target.value)}
+                  className="w-full rounded-xl border border-white/10 bg-black p-4"
+                  placeholder="01.08.2026"
+                />
+              </div>
 
-              <select
-                value={schufa}
-                onChange={(e) => setSchufa(e.target.value)}
-                className="rounded-xl border border-white/10 bg-black p-4"
-              >
-                <option>Ja</option>
-                <option>Nein</option>
-              </select>
+              <div>
+                <label className="mb-2 block text-xs font-black uppercase tracking-[0.2em] text-zinc-500">
+                  Haustiere
+                </label>
+                <select
+                  value={pets}
+                  onChange={(e) => setPets(e.target.value)}
+                  className="w-full rounded-xl border border-white/10 bg-black p-4"
+                >
+                  <option>Nein</option>
+                  <option>Ja</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="mb-2 block text-xs font-black uppercase tracking-[0.2em] text-zinc-500">
+                  Raucher
+                </label>
+                <select
+                  value={smoker}
+                  onChange={(e) => setSmoker(e.target.value)}
+                  className="w-full rounded-xl border border-white/10 bg-black p-4"
+                >
+                  <option>Nein</option>
+                  <option>Ja</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="mb-2 block text-xs font-black uppercase tracking-[0.2em] text-zinc-500">
+                  SCHUFA vorhanden
+                </label>
+                <select
+                  value={schufa}
+                  onChange={(e) => setSchufa(e.target.value)}
+                  className="w-full rounded-xl border border-white/10 bg-black p-4"
+                >
+                  <option>Ja</option>
+                  <option>Nein</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="mb-2 block text-xs font-black uppercase tracking-[0.2em] text-zinc-500">
+                  Mietschulden bekannt
+                </label>
+                <select
+                  value={debts}
+                  onChange={(e) => setDebts(e.target.value)}
+                  className="w-full rounded-xl border border-white/10 bg-black p-4"
+                >
+                  <option>Nein</option>
+                  <option>Ja</option>
+                </select>
+              </div>
             </div>
+
+            {error && (
+              <div className="mt-6 rounded-xl border border-red-400/30 bg-red-400/10 p-4 text-red-300">
+                {error}
+              </div>
+            )}
 
             <button
               onClick={analyzeApplication}
@@ -189,15 +365,13 @@ export default function DemoPage() {
                 <div className="mt-6 h-3 overflow-hidden rounded-full bg-white/10">
                   <div className="h-full w-2/3 rounded-full bg-emerald-400" />
                 </div>
-                <p className="mt-5 text-zinc-400">
-                  Kriterien werden bewertet und priorisiert.
-                </p>
+                <p className="mt-5 text-zinc-400">{phase}</p>
               </div>
             )}
 
             {result && (
               <div className="mt-8">
-                <div className="flex items-end justify-between">
+                <div className="flex items-end justify-between gap-4">
                   <div>
                     <p className="text-7xl font-black text-emerald-400">
                       {result.category}
@@ -207,7 +381,7 @@ export default function DemoPage() {
                     </p>
                   </div>
 
-                  <div className="rounded-2xl bg-emerald-400 px-5 py-3 font-black uppercase text-black">
+                  <div className="rounded-2xl bg-emerald-400 px-5 py-3 text-center font-black uppercase text-black">
                     {result.recommendation}
                   </div>
                 </div>
@@ -221,12 +395,38 @@ export default function DemoPage() {
 
                 <p className="mt-6 text-xl text-zinc-300">{result.title}</p>
 
-                <div className="mt-8 space-y-3">
-                  {result.notes.map((note) => (
-                    <div key={note} className="rounded-xl bg-emerald-400/10 p-4">
-                      {note}
+                <div className="mt-8 grid gap-4 md:grid-cols-2">
+                  <div>
+                    <p className="mb-3 text-sm font-black uppercase tracking-[0.25em] text-emerald-400">
+                      Positiv
+                    </p>
+                    <div className="space-y-3">
+                      {result.positives.map((item) => (
+                        <div key={item} className="rounded-xl bg-emerald-400/10 p-4">
+                          {item}
+                        </div>
+                      ))}
                     </div>
-                  ))}
+                  </div>
+
+                  <div>
+                    <p className="mb-3 text-sm font-black uppercase tracking-[0.25em] text-red-400">
+                      Risiken
+                    </p>
+                    <div className="space-y-3">
+                      {result.risks.length === 0 ? (
+                        <div className="rounded-xl bg-white/5 p-4 text-zinc-500">
+                          Keine Auffälligkeiten
+                        </div>
+                      ) : (
+                        result.risks.map((item) => (
+                          <div key={item} className="rounded-xl bg-red-400/10 p-4">
+                            {item}
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
