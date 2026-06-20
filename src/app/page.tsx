@@ -18,14 +18,14 @@ export default function HomePage() {
     <main className="min-h-screen bg-[#050505] text-white">
       <section className="mx-auto max-w-7xl px-6 py-8">
         <nav className="flex items-center justify-between border-b border-white/10 pb-6">
-          <div>
+          <a href="/" className="block">
             <p className="text-xl font-black uppercase tracking-[0.32em] text-emerald-400">
               Magic Key
             </p>
             <p className="mt-1 text-xs uppercase tracking-[0.24em] text-zinc-500">
               Real Estate Screening
             </p>
-          </div>
+          </a>
 
           <div className="flex gap-3">
             <a
